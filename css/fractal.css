@@ -1,0 +1,11 @@
+.paper {
+    border-style: groove;
+    border-width: 4px;
+    border-color: black;
+    width: 500px;
+}
+
+.controls {
+    width: 500px;
+    height: 300px;
+}
