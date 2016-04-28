@@ -14,6 +14,7 @@
  *     x = pt % ROW_S
  *     y = Math.floor pt / ROW_S
  *
+ * TODO some documentation on each function
  */
 
 var IntegerNoise = require('./integer-noise.js')
@@ -37,7 +38,7 @@ DiamondSquare.prototype.random = function(pt) {
 }
 
 DiamondSquare.prototype.squareCornerAvg = function(pt) {
-    l = Math.floor(this.sqrSide / 2)
+    var l = Math.floor(this.sqrSide / 2) // TODO what is "l"? length?
     this.heightMap[pt] = Math.floor(
         (
             this.heightMap[pt - l - l * this.rowSize] // top left
@@ -49,3 +50,68 @@ DiamondSquare.prototype.squareCornerAvg = function(pt) {
     )
 }
 
+DiamondSquare.prototype.diamondCornerAvg = function(pt) {
+    var l = Math.floor(this.sqrSide / 2)
+    var points = []
+    var avg = 0
+
+    // top, right, bottom, left
+    // Make sure the point actually exists before pushing it
+    // TODO optimize
+    if (this.heightMap[pt - l * this.rowSize])
+        points.push(this.heightMap[pt - l * this.rowSize])
+    if (pt % this.rowSize + l < this.rowSize)
+        points.push(this.heightMap[pt + l])
+    if (this.heightMap[pt + l * this.rowSize])
+        points.push(this.heightMap[pt + l * this.rowSize])
+    if (pt % this.rowSize - l >= 0)
+        points.push(this.heightMap[pt - l])
+
+    for (i = 0; i < points.length; i++) {
+        avg += points[i]
+    }
+
+    this.heightMap[pt] = Math.floor(avg / points.length + this.random(pt))
+}
+
+DiamondSquare.prototype.diamondStep = function(pt) {
+    this.diamondCornerAvg(pt - Math.floor(this.sqrSide / 2)) // Left
+    this.diamondCornerAvg(pt - Math.floor(this.sqrSide / 2) * this.rowSize) // Top
+    this.diamondCornerAvg(pt + Math.floor(this.sqrSide / 2)) // Right
+    this.diamondCornerAvg(pt + Math.floor(this.sqrSide / 2) * this.rowSize) // Bottom
+}
+
+DiamondSquare.prototype.generate = function() {
+    this.rowSize = Math.pow(2, this.iterations) + 1
+    this.randRange = this.initialRange
+
+    this.heightMap = []
+    for (i = 0; i < this.rowSize * this.rowSize) {
+        this.heightMap[i] = 50
+    }
+
+    // Initialize corners
+    this.heightMap[0] += this.random(0)
+    this.heightMap[this.rowSize - 1] += this.random(this.rowSize - 1)
+    this.heightMap[(this.rowSize - 1) * this.rowSize] += this.random((this.rowSize - 1) * this.rowSize)
+    this.heightMap[this.heightMap.length - 1] += this.random(this.heightMap.length - 1)
+
+    for (iteration = 1; iteration < this.iterations; iteration++) {
+        var squares = Math.pow(4, iterations - 1)
+        this.sqrSide = Math.ceil(this.rowSize / (Math.pow(2, iterations - 1)))
+        var sqrRow_s = Math.pow(2, iterations - 1)
+        for (s = 0; s < squares; s++) {
+            var sqrX = (s - Math.floor(s / sqrRow_s) * sqrRow_s)
+            var sqrY = Math.floor(s / sqrRow_s)
+            var sqrOffset = sqrX * (this.sqrSide - 1) + sqrY * (this.sqrSide - 1) * this.rowSize
+            // Diamond
+            this.squareCornerAvg(Math.floor(this.sqrSide / 2) + Math.floor(this.sqrSide / 2) * this.rowSize + sqrOffset)
+            // Square
+            this.diamondStep(Math.floor(this.sqrSide / 2) + Math.floor(this.sqrSide / 2) * this.rowSize + sqrOffset)
+        }
+        this.randRange = Math.ceil(this.randRange * Math.pow(2, -this.smoothness))
+    }
+    return this.heightMap
+}
+
+module.exports = DiamondSquare
