@@ -4,12 +4,12 @@
  *     Find the midpoint in the square and average the square's four
  *     corners plus a random number to find the value for that midpoint,
  *     creating diamonds.
- * 
+ *
  * Square step: take diamonds and make squares.
  *     find midpoints on each side of the square, find their diamond
  *     corners and average them + random number to find the value for
  *     that midpoint, creating squares.
- * 
+ *
  * Points are stored in a one-dimensional array. To find x and y for point pt:
  *     x = pt % ROW_S
  *     y = Math.floor pt / ROW_S
