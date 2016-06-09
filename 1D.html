@@ -2,11 +2,8 @@
 
 <html>
     <head>
-        <title>Ian Boswell's Midpoint Displacement Algorithm</title>
-        <link rel="stylesheet" href="css/ui-darkness/jquery-ui-1.10.3.custom.css">
+        <title>One-Dimensional Midpoint Displacement</title>
         <link rel="stylesheet" href="css/fractal.css">
-        <script type="text/javascript" src="lib/jquery-1.9.1.js"></script>
-        <script type="text/javascript" src="lib/jquery-ui-1.10.3.custom.js"></script>
         <script type="text/javascript" src="lib/raphael.js"></script>
         <script type="text/javascript" src="src/1D.js"></script>
     </head>
@@ -16,16 +13,17 @@
         <div class="controls">
             <h2>Controls</h2>
             <br>
-            <label class="slider" id="lblIt">Iterations: 0</label>
-            <div id="sliderIt"></div>
-            <br>
-            <label class="slider" id="lblSm">Smoothness constant: 0.63</label>
-            <div id="sliderSm"></div>
-            <br>
-            <label class="slider" id="lblRa">Range: 150</label>
-            <div id="sliderRa"></div>
-            <br>
+            <label class="slider" id="lblIt" for="sliderIt"></label>
+            <input type="range" id="sliderIt" max="11">
+            <br><br>
+            <label class="slider" id="lblSm" for="sliderSm"></label>
+            <input type="range" id="sliderSm" max="2" step=".01">
+            <br><br>
+            <label class="slider" id="lblRa" for="sliderRa"></label>
+            <input type="range" id="sliderRa" max="300">
+            <br><br>
             <button id="reset">Reset</button>
         </div>
+        <small>Created by <a href="http://www.iancboswell.com">Ian Boswell</a></small>
     </body>
 </html>

@@ -9,3 +9,11 @@
     width: 500px;
     height: 300px;
 }
+
+.controls label {
+    margin-left: 10px;
+}
+
+.controls input {
+    float: left;
+}
