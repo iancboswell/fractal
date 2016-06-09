@@ -4,9 +4,9 @@
     <head>
         <title>Ian Boswell's 2D Terrain Algorithms in CoffeeScript</title>
 
-        <link rel="stylesheet" href="build/css/ui-darkness/jquery-ui-1.10.3.custom.css">
-        <link rel="stylesheet" href="build/css/fractal.css">
-        <script src="2D"></script>
+        <link rel="stylesheet" href="css/fractal.css">
+
+        <script src="./lib/require1k.min.js" data-main="./js/2D"></script>
     </head>
     <body>
         <h1 id="headerAlg">Loading. . .</h1>
@@ -19,16 +19,16 @@
         <div class="controls">
             <h2>Controls</h2>
             <label class="slider" id="lbl1"></label>
-            <div id="slider1"></div>
+            <input type="range" id="slider1">
             <br>
             <label class="slider" id="lbl2"></label>
-            <div id="slider2"></div>
+            <input type="range" id="slider2">
             <br>
             <label class="slider" id="lbl3"></label>
-            <div id="slider3"></div>
+            <input type="range" id="slider3">
             <br>
             <label class="slider" id="lbl4"></label>
-            <div id="slider4"></div>
+            <input type="range" id="slider4">
             <br>
             <label class="slider"></label>
             <div id="algType">
