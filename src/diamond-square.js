@@ -86,7 +86,7 @@ DiamondSquare.prototype.generate = function() {
     this.randRange = this.initialRange
 
     this.heightMap = []
-    for (i = 0; i < this.rowSize * this.rowSize) {
+    for (i = 0; i < this.rowSize * this.rowSize; i++) {
         this.heightMap[i] = 50
     }
 
