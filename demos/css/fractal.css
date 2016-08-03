@@ -17,3 +17,7 @@
 .controls input {
     float: left;
 }
+
+.ui-slider {
+	width: 265px;
+}
