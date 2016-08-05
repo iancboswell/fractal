@@ -49,6 +49,7 @@ var Perlin = function(octaves, roughness, lacunarity) {
 
 Perlin.prototype.generatePermutationTable = function() {
     this.perm = []
+    var nums = []
     for (i = 0; i <= 255; i++) {
         nums[i] = i
     }

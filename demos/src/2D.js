@@ -8,164 +8,216 @@
  * This is a simple user interface that's designed to switch
  * between Perlin and Diamond-Square terrain generation.
  */
-
 var DiamondSquare = require("../../src/diamond-square")
 var Perlin = require("../../src/perlin")
 
-var PERLIN_SCALE = 124
-var PIXEL_SIZE = 1
+window.addEventListener("load", function() {
+    var diamondSquare = new DiamondSquare()
+    var perlin = new Perlin()
 
-// HTML5 Canvas context
-var ctx = document.getElementById("leCanvas").getContext("2d")
+    var PERLIN_SCALE = 124
+    var PIXEL_SIZE = 1
 
-/* UI Elements */
-var headerAlg = document.getElementById("headerAlg")
+    // HTML5 Canvas context
+    var ctx = document.getElementById("leCanvas").getContext("2d")
 
-var label1 = document.getElementById("label1")
-var slider1 = document.getElementById("slider1")
-var label1 = document.getElementById("label2")
-var slider2 = document.getElementById("slider2")
-var label1 = document.getElementById("label3")
-var slider3 = document.getElementById("slider3")
-var label1 = document.getElementById("label4")
-var slider4 = document.getElementById("slider4")
+    /* UI Elements */
+    var headerAlg = document.getElementById("headerAlg")
 
-var radioDiamondSquare = document.getElementById("d-s")
-var radioPerlin = document.getElementById("perlin")
+    var label1 = document.getElementById("label1")
+    var slider1 = document.getElementById("slider1")
+    var label1 = document.getElementById("label2")
+    var slider2 = document.getElementById("slider2")
+    var label1 = document.getElementById("label3")
+    var slider3 = document.getElementById("slider3")
+    var label1 = document.getElementById("label4")
+    var slider4 = document.getElementById("slider4")
 
-var btnRegen = document.getElementById("btnRegen")
+    var radioDiamondSquare = document.getElementById("d-s")
+    var radioPerlin = document.getElementById("perlin")
 
-/* UI Handlers */
+    var btnRegen = document.getElementById("btnRegen")
 
-// Diamond-Square
-function syncIterationLabel() {
-	label1.innerHTML = "Iterations: " + DiamondSquare.iterations
-}
-function iterationHandler(e) {
-	DiamondSquare.iterations = slider1.value
-	syncIterationLabel()
-	PIXEL_SIZE = Math.pow(2, 9 - DiamondSquare.iterations)
-	generate()
-}
-function syncSmoothnessLabel() {
-	label2.innerHTML = "Smoothness Constant: " + DiamondSquare.smoothness
-}
-function smoothnessHandler(e) {
-	DiamondSquare.smoothness = slider2.value
-	syncSmoothnessLabel()
-	generate()
-}
-function syncRandomLabel() {
-	label3.innerHTML = "Random Range: " + DiamondSquare.initialRange
-}
-function randomRangeHandler(e) {
-	DiamondSquare.initialRange = slider3.value
-	syncRandomLabel()
-	generate()
-}
-function syncSeedLabel() {
-	label4.innerHTML = "Seed: " + DiamondSquare.IntegerNoise.seed
-}
-function seedHandler(e) {
-	DiamondSquare.IntegerNoise.seed = slider4.value
-	syncSeedLabel()
-}
+    /* UI Handlers */
 
-// Perlin
-function syncOctaveLabel() {
-	label1.innerHTML = "Octaves: " + Perlin.octaves
-}
-function octaveHandler(e) {
-	Perlin.octaves = slider1.value
-	syncOctaveLabel()
-	generate()
-}
-function syncRoughnessLabel() {
-	label2.innerHTML = "Roughness: " + Perlin.roughness
-}
-function roughnessHandler(e) {
-	Perlin.roughness = slider2.value
-	syncRoughnessLabel()
-	generate()
-}
-function syncLacunarityLabel() {
-	label3.innerHTML = "Lacunarity: " + Perlin.lacunarity
-}
-function lacunarityHandler(e) {
-	Perlin.lacunarity = slider3.value
-	syncLacunarityLabel()
-	generate()
-}
-function syncScaleLabel() {
-	label4.innerHTML = "Scale: " + PERLIN_SCALE
-}
-function scaleHandler(e) {
-	PERLIN_SCALE = slider4.value
-	syncScaleLabel()
-	generate()
-}
+    // Diamond-Square
+    function syncIterationLabel() {
+        label1.innerHTML = "Iterations: " + diamondSquare.iterations
+    }
+    function iterationHandler(e) {
+        diamondSquare.iterations = slider1.value
+        syncIterationLabel()
+        PIXEL_SIZE = Math.pow(2, 9 - diamondSquare.iterations)
+        generate()
+    }
+    function syncSmoothnessLabel() {
+        label2.innerHTML = "Smoothness Constant: " + diamondSquare.smoothness
+    }
+    function smoothnessHandler(e) {
+        diamondSquare.smoothness = slider2.value
+        syncSmoothnessLabel()
+        generate()
+    }
+    function syncRandomLabel() {
+        label3.innerHTML = "Random Range: " + diamondSquare.initialRange
+    }
+    function randomRangeHandler(e) {
+        diamondSquare.initialRange = slider3.value
+        syncRandomLabel()
+        generate()
+    }
+    function syncSeedLabel() {
+        label4.innerHTML = "Seed: " + diamondSquare.getSeed()
+    }
+    function seedHandler(e) {
+        diamondSquare.setSeed(slider4.value)
+        syncSeedLabel()
+    }
 
-function initializeSlider(slider, min, max, step, value, handler) {
-	slider.setAttribute("min", min) // TODO
-	slider.setAttribute("max", max)
-	slider.setAttribute("value", value)
-	slider.onchange = handler // TODO onstop?
-}
+    // Perlin
+    function syncOctaveLabel() {
+        label1.innerHTML = "Octaves: " + perlin.octaves
+    }
+    function octaveHandler(e) {
+        perlin.octaves = slider1.value
+        syncOctaveLabel()
+        generate()
+    }
+    function syncRoughnessLabel() {
+        label2.innerHTML = "Roughness: " + perlin.roughness
+    }
+    function roughnessHandler(e) {
+        perlin.roughness = slider2.value
+        syncRoughnessLabel()
+        generate()
+    }
+    function syncLacunarityLabel() {
+        label3.innerHTML = "Lacunarity: " + perlin.lacunarity
+    }
+    function lacunarityHandler(e) {
+        perlin.lacunarity = slider3.value
+        syncLacunarityLabel()
+        generate()
+    }
+    function syncScaleLabel() {
+        label4.innerHTML = "Scale: " + PERLIN_SCALE
+    }
+    function scaleHandler(e) {
+        PERLIN_SCALE = slider4.value
+        syncScaleLabel()
+        generate()
+    }
 
-function initializeDiamondSquareUI() {
-	headerAlg.innerHTML = "Diamond-Square"
+    function initializeSlider(slider, min, max, step, value, handler) {
+        slider.setAttribute("min", min) // TODO
+        slider.setAttribute("max", max)
+        slider.setAttribute("value", value)
+        slider.onchange = handler // TODO onstop?
+    }
 
-	btnRegen.innerHTML = "Reset"
-	btnRegen.onclick = function() {
-		slider1.setAttribute("value", DiamondSquare.defaultIterations)
-		slider2.setAttribute("value", DiamondSquare.defaultSmoothness)
-		syncIterationLabel()
-		syncSmoothnessLabel()
-		// TODO should have a reset function on the DiamondSquare object
-		DiamondSquare.iterations = DiamondSquare.defaultIterations
-		DiamondSquare.smoothness = DiamondSquare.defaultSmoothness
-		generate()
-	}
+    function initializeDiamondSquareUI() {
+        headerAlg.innerHTML = "Diamond-Square"
 
-	initializeSlider(slider1, 1, 9, 1, DiamondSquare.iterations, iterationHandler)
-	syncIterationLabel()
+        btnRegen.innerHTML = "Reset"
+        btnRegen.onclick = function() {
+            slider1.setAttribute("value", diamondSquare.defaultIterations)
+            slider2.setAttribute("value", diamondSquare.defaultSmoothness)
+            syncIterationLabel()
+            syncSmoothnessLabel()
+            // TODO should have a reset function on the DiamondSquare object
+            diamondSquare.iterations = diamondSquare.defaultIterations
+            diamondSquare.smoothness = diamondSquare.defaultSmoothness
+            generate()
+        }
 
-	initializeSlider(slider2, .1, 1, .1, DiamondSquare.smoothness, smoothnessHandler)
-	syncSmoothnessLabel()
+        initializeSlider(slider1, 1, 9, 1, diamondSquare.iterations, iterationHandler)
+        syncIterationLabel()
 
-	initializeSlider(slider3, 1, 40, 1, DiamondSquare.initialRange, randomRangeHandler)
-	syncRandomLabel()
+        initializeSlider(slider2, .1, 1, .1, diamondSquare.smoothness, smoothnessHandler)
+        syncSmoothnessLabel()
 
-	initializeSlider(slider4, 1, 256, 1, DiamondSquare.IntegerNoise.seed, syncSeedLabel)
-	syncSeedLabel()
-}
+        initializeSlider(slider3, 1, 40, 1, diamondSquare.initialRange, randomRangeHandler)
+        syncRandomLabel()
 
-function initializePerlinUI() {
-	headerAlg.innerHTML = "Perlin Noise"
+        initializeSlider(slider4, 1, 256, 1, diamondSquare.getSeed(), syncSeedLabel)
+        syncSeedLabel()
+    }
 
-	btnRegen.innerHTML = "Regenerate Permutation Table"
-	btnRegen.onclick = function() {
-		Perlin.generatePermutationTable()
-		generate()
-	}
+    function initializePerlinUI() {
+        headerAlg.innerHTML = "Perlin Noise"
 
-	initializeSlider(slider1, 1, 9, 1, Perlin.octaves, octaveHandler)
-	syncOctaveLabel()
+        btnRegen.innerHTML = "Regenerate Permutation Table"
+        btnRegen.onclick = function() {
+            perlin.generatePermutationTable()
+            generate()
+        }
 
-	initializeSlider(slider2, .01, 4, .01, Perlin.roughness, roughnessHandler)
-	syncRoughnessLabel()
+        initializeSlider(slider1, 1, 9, 1, perlin.octaves, octaveHandler)
+        syncOctaveLabel()
 
-	initializeSlider(slider3, 1, 16, 1, Perlin.lacunarity, lacunarityHandler)
-	syncLacunarityLabel()
+        initializeSlider(slider2, .01, 4, .01, perlin.roughness, roughnessHandler)
+        syncRoughnessLabel()
 
-	initializeSlider(slider4, 1, 256, 1, PERLIN_SCALE, scaleHandler)
-	syncScaleLabel()
-}
+        initializeSlider(slider3, 1, 16, 1, perlin.lacunarity, lacunarityHandler)
+        syncLacunarityLabel()
 
-function initialize() {
-	radioDiamondSquare.onclick = function() {
-		PIXEL_SIZE = Math.pow(2, 9 - DiamondSquare.iterations)
-		initializeDiamondSquareUI()
-		generate()
-	}
-}
+        initializeSlider(slider4, 1, 256, 1, PERLIN_SCALE, scaleHandler)
+        syncScaleLabel()
+    }
+
+    function initialize() {
+        console.log("Initializing")
+
+        radioDiamondSquare.onclick = function() {
+            PIXEL_SIZE = Math.pow(2, 9 - diamondSquare.iterations)
+            initializeDiamondSquareUI()
+            generate()
+        }
+        radioPerlin.onclick = function() {
+            PIXEL_SIZE = 1
+            initializePerlinUI()
+            generate()
+        }
+
+        // Start with the Diamond-Square demo
+        radioDiamondSquare.click()
+    }
+
+    /**
+     * Draws a pixel of PIXEL_SIZE at coordinates (x, y)
+     * h is a height value from 0-100 and determines shading
+     */
+    function drawPixel(x, y, h) {
+        var color = h * 2.55
+        ctx.fillStyle = "rgb("+color+","+color+","+color+")"
+        ctx.fillRect(x * PIXEL_SIZE, y * PIXEL_SIZE, PIXEL_SIZE, PIXEL_SIZE)
+    }
+
+    /**
+     * Draws a Diamond-Square height map (1-dimensional pixel array)
+     */
+    function drawHMap(map) {
+        for (var i = 0; i < map.length - 1; i++) {
+            // TODO these calculations seem wrong?
+            var y = Math.floor(i / diamondSquare.rowSize)
+            var x = i - y * diamondSquare.rowSize
+            drawPixel(x, y, Math.floor(map[i]))
+        }
+    }
+
+    function generate() {
+        if (radioDiamondSquare.checked) {
+            drawHMap(diamondSquare.generate())
+        } else {
+            ctx.clearRect(0, 0, leCanvas.width, leCanvas.height)
+            for (var y = 0; y < Math.floor(leCanvas.height); y++) {
+                for (var x = 0; x < Math.floor(leCanvas.width); x++) {
+                    var p = perlin.fBm2(x / PERLIN_SCALE, y / PERLIN_SCALE, 1)
+                    drawPixel(x, y, (p + 1) * 40)
+                }
+            }
+        }
+    }
+
+    initialize()
+})

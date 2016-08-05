@@ -34,7 +34,15 @@ var DiamondSquare = function(defaultIterations, defaultSmoothness, initialRange)
 }
 
 DiamondSquare.prototype.random = function(pt) {
-    return this.integerNoise.rand(pt) * randRange
+    return this.integerNoise.rand(pt) * this.randRange
+}
+
+DiamondSquare.prototype.getSeed = function() {
+    return this.integerNoise.seed
+}
+
+DiamondSquare.prototype.setSeed = function(seed) {
+    this.integerNoise.seed = seed
 }
 
 DiamondSquare.prototype.squareCornerAvg = function(pt) {
@@ -96,10 +104,10 @@ DiamondSquare.prototype.generate = function() {
     this.heightMap[(this.rowSize - 1) * this.rowSize] += this.random((this.rowSize - 1) * this.rowSize)
     this.heightMap[this.heightMap.length - 1] += this.random(this.heightMap.length - 1)
 
-    for (iteration = 1; iteration < this.iterations; iteration++) {
-        var squares = Math.pow(4, iterations - 1)
-        this.sqrSide = Math.ceil(this.rowSize / (Math.pow(2, iterations - 1)))
-        var sqrRow_s = Math.pow(2, iterations - 1)
+    for (var iteration = 1; iteration < this.iterations; iteration++) {
+        var squares = Math.pow(4, iteration - 1)
+        this.sqrSide = Math.ceil(this.rowSize / (Math.pow(2, iteration - 1)))
+        var sqrRow_s = Math.pow(2, iteration - 1)
         for (s = 0; s < squares; s++) {
             var sqrX = (s - Math.floor(s / sqrRow_s) * sqrRow_s)
             var sqrY = Math.floor(s / sqrRow_s)
