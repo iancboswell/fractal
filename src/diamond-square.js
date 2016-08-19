@@ -20,9 +20,12 @@
 var IntegerNoise = require('./integer-noise.js')
 
 var DiamondSquare = function(defaultIterations, defaultSmoothness, initialRange) {
-    this.iterations = defaultIterations
-    this.smoothness = defaultSmoothness
-    this.randRange = initialRange
+    this.defaultIterations = defaultIterations ? defaultIterations : 1
+    this.defaultSmoothness = defaultSmoothness ? defaultSmoothness : .5
+    this.initialRange = initialRange ? initialRange : 20
+
+    // Now that defaults are set, call reset to set the normal values
+    this.reset()
 
     this.integerNoise = new IntegerNoise()
 
@@ -31,6 +34,15 @@ var DiamondSquare = function(defaultIterations, defaultSmoothness, initialRange)
     this.heightMap = 0
 
     this.sqrSide = 0
+}
+
+/**
+ * Reset to initial values.
+ */
+DiamondSquare.prototype.reset = function() {
+    this.iterations = this.defaultIterations
+    this.smoothness = this.defaultSmoothness
+    this.randRange = this.initialRange
 }
 
 DiamondSquare.prototype.random = function(pt) {

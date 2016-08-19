@@ -31,9 +31,9 @@
  */
 
 var Perlin = function(octaves, roughness, lacunarity) {
-    this.octaves = octaves
-    this.roughness = roughness
-    this.lacunarity = lacunarity
+    this.octaves = octaves ? octaves : 1
+    this.roughness = roughness ? roughness : 1
+    this.lacunarity = lacunarity ? lacunarity : 1
 
     // Gradient tables
     this.grad2 = [

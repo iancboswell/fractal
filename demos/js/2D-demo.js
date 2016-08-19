@@ -13,8 +13,8 @@ var DiamondSquare = require("../../src/diamond-square")
 var Perlin = require("../../src/perlin")
 
 window.addEventListener("load", function() {
-    var diamondSquare = new DiamondSquare()
-    var perlin = new Perlin()
+    window.diamondSquare = new DiamondSquare()
+    window.perlin = new Perlin()
 
     var PERLIN_SCALE = 124
     var PIXEL_SIZE = 1
@@ -27,11 +27,11 @@ window.addEventListener("load", function() {
 
     var label1 = document.getElementById("label1")
     var slider1 = document.getElementById("slider1")
-    var label1 = document.getElementById("label2")
+    var label2 = document.getElementById("label2")
     var slider2 = document.getElementById("slider2")
-    var label1 = document.getElementById("label3")
+    var label3 = document.getElementById("label3")
     var slider3 = document.getElementById("slider3")
-    var label1 = document.getElementById("label4")
+    var label4 = document.getElementById("label4")
     var slider4 = document.getElementById("slider4")
 
     var radioDiamondSquare = document.getElementById("d-s")
@@ -60,10 +60,10 @@ window.addEventListener("load", function() {
         generate()
     }
     function syncRandomLabel() {
-        label3.innerHTML = "Random Range: " + diamondSquare.initialRange
+        label3.innerHTML = "Random Range: " + diamondSquare.randRange
     }
     function randomRangeHandler(e) {
-        diamondSquare.initialRange = slider3.value
+        diamondSquare.randRange = slider3.value
         syncRandomLabel()
         generate()
     }
@@ -110,9 +110,10 @@ window.addEventListener("load", function() {
     }
 
     function initializeSlider(slider, min, max, step, value, handler) {
-        slider.setAttribute("min", min) // TODO
-        slider.setAttribute("max", max)
-        slider.setAttribute("value", value)
+        //slider.min = min // TODO
+        slider.max = max
+        slider.value = value
+        slider.step = step
         slider.onchange = handler // TODO onstop?
     }
 
@@ -128,6 +129,7 @@ window.addEventListener("load", function() {
             // TODO should have a reset function on the DiamondSquare object
             diamondSquare.iterations = diamondSquare.defaultIterations
             diamondSquare.smoothness = diamondSquare.defaultSmoothness
+            diamondSquare.randRange = diamondSquare.initialRange
             generate()
         }
 
@@ -137,10 +139,10 @@ window.addEventListener("load", function() {
         initializeSlider(slider2, .1, 1, .1, diamondSquare.smoothness, smoothnessHandler)
         syncSmoothnessLabel()
 
-        initializeSlider(slider3, 1, 40, 1, diamondSquare.initialRange, randomRangeHandler)
+        initializeSlider(slider3, 1, 40, 1, diamondSquare.randRange, randomRangeHandler)
         syncRandomLabel()
 
-        initializeSlider(slider4, 1, 256, 1, diamondSquare.getSeed(), syncSeedLabel)
+        initializeSlider(slider4, 1, 256, 1, diamondSquare.getSeed(), seedHandler)
         syncSeedLabel()
     }
 
@@ -245,9 +247,12 @@ window.addEventListener("load", function() {
 var IntegerNoise = require('./integer-noise.js')
 
 var DiamondSquare = function(defaultIterations, defaultSmoothness, initialRange) {
-    this.iterations = defaultIterations
-    this.smoothness = defaultSmoothness
-    this.randRange = initialRange
+    this.defaultIterations = defaultIterations ? defaultIterations : 1
+    this.defaultSmoothness = defaultSmoothness ? defaultSmoothness : .5
+    this.initialRange = initialRange ? initialRange : 20
+
+    // Now that defaults are set, call reset to set the normal values
+    this.reset()
 
     this.integerNoise = new IntegerNoise()
 
@@ -256,6 +261,15 @@ var DiamondSquare = function(defaultIterations, defaultSmoothness, initialRange)
     this.heightMap = 0
 
     this.sqrSide = 0
+}
+
+/**
+ * Reset to initial values.
+ */
+DiamondSquare.prototype.reset = function() {
+    this.iterations = this.defaultIterations
+    this.smoothness = this.defaultSmoothness
+    this.randRange = this.initialRange
 }
 
 DiamondSquare.prototype.random = function(pt) {
@@ -360,7 +374,9 @@ module.exports = DiamondSquare
  * Optionally pass a seed value into the constructor; otherwise, a default is used.
  */
 var IntegerNoise = function(seed) {
+    console.log("setting seed", seed)
     this.seed = seed ? seed : 1
+    console.log("set to", this.seed)
 }
 
 /**
@@ -423,9 +439,9 @@ module.exports = IntegerNoise
  */
 
 var Perlin = function(octaves, roughness, lacunarity) {
-    this.octaves = octaves
-    this.roughness = roughness
-    this.lacunarity = lacunarity
+    this.octaves = octaves ? octaves : 1
+    this.roughness = roughness ? roughness : 1
+    this.lacunarity = lacunarity ? lacunarity : 1
 
     // Gradient tables
     this.grad2 = [

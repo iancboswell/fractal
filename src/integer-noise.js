@@ -9,7 +9,9 @@
  * Optionally pass a seed value into the constructor; otherwise, a default is used.
  */
 var IntegerNoise = function(seed) {
+    console.log("setting seed", seed)
     this.seed = seed ? seed : 1
+    console.log("set to", this.seed)
 }
 
 /**
