@@ -15,11 +15,9 @@ window.addEventListener("load", function() {
     window.diamondSquare = new DiamondSquare()
     window.perlin = new Perlin()
 
-    var PERLIN_SCALE = 124
-    var PIXEL_SIZE = 1
-
     // HTML5 Canvas context
-    var ctx = document.getElementById("leCanvas").getContext("2d")
+    var leCanvas = document.getElementById("leCanvas")
+    var ctx = leCanvas.getContext("2d")
 
     /* UI Elements */
     var headerAlg = document.getElementById("headerAlg")
@@ -38,6 +36,14 @@ window.addEventListener("load", function() {
 
     var btnRegen = document.getElementById("btnRegen")
 
+    // This is for diamond-square
+    function calculatePixelSize() {
+        return Math.floor(leCanvas.width / diamondSquare.rowSize)
+    }
+
+    var PERLIN_SCALE = 124
+    var PIXEL_SIZE = calculatePixelSize()
+
     /* UI Handlers */
 
     // Diamond-Square
@@ -47,7 +53,7 @@ window.addEventListener("load", function() {
     function iterationHandler(e) {
         diamondSquare.iterations = slider1.value
         syncIterationLabel()
-        PIXEL_SIZE = Math.pow(2, 9 - diamondSquare.iterations)
+        PIXEL_SIZE = calculatePixelSize()
         generate()
     }
     function syncSmoothnessLabel() {
@@ -121,14 +127,15 @@ window.addEventListener("load", function() {
 
         btnRegen.innerHTML = "Reset"
         btnRegen.onclick = function() {
-            slider1.setAttribute("value", diamondSquare.defaultIterations)
-            slider2.setAttribute("value", diamondSquare.defaultSmoothness)
+            diamondSquare.reset()
+
+            slider1.value = diamondSquare.iterations
+            slider2.value = diamondSquare.imoothness
+            slider3.value = diamondSquare.randRange
             syncIterationLabel()
             syncSmoothnessLabel()
-            // TODO should have a reset function on the DiamondSquare object
-            diamondSquare.iterations = diamondSquare.defaultIterations
-            diamondSquare.smoothness = diamondSquare.defaultSmoothness
-            diamondSquare.randRange = diamondSquare.initialRange
+            syncRandomLabel()
+
             generate()
         }
 
@@ -171,7 +178,7 @@ window.addEventListener("load", function() {
         console.log("Initializing")
 
         radioDiamondSquare.onclick = function() {
-            PIXEL_SIZE = Math.pow(2, 9 - diamondSquare.iterations)
+            PIXEL_SIZE = calculatePixelSize()
             initializeDiamondSquareUI()
             generate()
         }
@@ -190,7 +197,8 @@ window.addEventListener("load", function() {
      * h is a height value from 0-100 and determines shading
      */
     function drawPixel(x, y, h) {
-        var color = h * 2.55
+        console.debug("Drawing pixel", x, y, h, PIXEL_SIZE)
+        var color = Math.floor(h * 2.55)
         ctx.fillStyle = "rgb("+color+","+color+","+color+")"
         ctx.fillRect(x * PIXEL_SIZE, y * PIXEL_SIZE, PIXEL_SIZE, PIXEL_SIZE)
     }
@@ -199,15 +207,15 @@ window.addEventListener("load", function() {
      * Draws a Diamond-Square height map (1-dimensional pixel array)
      */
     function drawHMap(map) {
-        for (var i = 0; i < map.length - 1; i++) {
-            // TODO these calculations seem wrong?
+        for (var i = 0; i < map.length; i++) {
+            var x = i % diamondSquare.rowSize
             var y = Math.floor(i / diamondSquare.rowSize)
-            var x = i - y * diamondSquare.rowSize
             drawPixel(x, y, Math.floor(map[i]))
         }
     }
 
     function generate() {
+        ctx.clearRect(0, 0, leCanvas.width, leCanvas.height)
         if (radioDiamondSquare.checked) {
             drawHMap(diamondSquare.generate())
         } else {
