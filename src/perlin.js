@@ -120,7 +120,7 @@ Perlin.prototype.noise2 = function(x, y, offset) {
         (originX + 1 + this.perm[
             (originY + 1 + this.perm[offset & 255]) & 255
         ]) & 255
-    ]
+    ] % 8
 
     // Noise contributions from each corner
     var n00 = this.dot(this.grad2[g00], x, y)

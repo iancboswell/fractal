@@ -176,7 +176,7 @@ window.addEventListener("load", function() {
     }
 
     function initialize() {
-        console.log("Initializing")
+        //console.log("Initializing")
 
         radioDiamondSquare.onclick = function() {
             PIXEL_SIZE = calculatePixelSize()
@@ -207,7 +207,7 @@ window.addEventListener("load", function() {
      * Draws a Diamond-Square height map (1-dimensional pixel array)
      */
     function drawHMap(map) {
-        console.debug("Drawing height map", map)
+        //console.debug("Drawing height map", map)
         for (var i = 0; i < map.length; i++) {
             var x = i % diamondSquare.rowSize
             var y = Math.floor(i / diamondSquare.rowSize)

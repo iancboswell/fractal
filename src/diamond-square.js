@@ -113,7 +113,7 @@ DiamondSquare.prototype.setIterations = function(iterations) {
 }
 
 DiamondSquare.prototype.generate = function() {
-    console.debug("Generating with " + this.iterations + " iterations.")
+    //console.debug("Generating with " + this.iterations + " iterations.")
 
     this.randRange = this.initialRange
 

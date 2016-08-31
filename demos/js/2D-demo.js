@@ -177,7 +177,7 @@ window.addEventListener("load", function() {
     }
 
     function initialize() {
-        console.log("Initializing")
+        //console.log("Initializing")
 
         radioDiamondSquare.onclick = function() {
             PIXEL_SIZE = calculatePixelSize()
@@ -208,7 +208,7 @@ window.addEventListener("load", function() {
      * Draws a Diamond-Square height map (1-dimensional pixel array)
      */
     function drawHMap(map) {
-        console.debug("Drawing height map", map)
+        //console.debug("Drawing height map", map)
         for (var i = 0; i < map.length; i++) {
             var x = i % diamondSquare.rowSize
             var y = Math.floor(i / diamondSquare.rowSize)
@@ -349,7 +349,7 @@ DiamondSquare.prototype.setIterations = function(iterations) {
 }
 
 DiamondSquare.prototype.generate = function() {
-    console.debug("Generating with " + this.iterations + " iterations.")
+    //console.debug("Generating with " + this.iterations + " iterations.")
 
     this.randRange = this.initialRange
 
@@ -547,7 +547,7 @@ Perlin.prototype.noise2 = function(x, y, offset) {
         (originX + 1 + this.perm[
             (originY + 1 + this.perm[offset & 255]) & 255
         ]) & 255
-    ]
+    ] % 8
 
     // Noise contributions from each corner
     var n00 = this.dot(this.grad2[g00], x, y)
