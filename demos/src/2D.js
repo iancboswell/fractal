@@ -38,7 +38,7 @@ window.addEventListener("load", function() {
 
     // This is for diamond-square
     function calculatePixelSize() {
-        return Math.floor(leCanvas.width / diamondSquare.rowSize)
+        return leCanvas.width / diamondSquare.rowSize
     }
 
     var PERLIN_SCALE = 124
@@ -51,7 +51,7 @@ window.addEventListener("load", function() {
         label1.innerHTML = "Iterations: " + diamondSquare.iterations
     }
     function iterationHandler(e) {
-        diamondSquare.iterations = slider1.value
+        diamondSquare.setIterations(slider1.value)
         syncIterationLabel()
         PIXEL_SIZE = calculatePixelSize()
         generate()
@@ -65,10 +65,10 @@ window.addEventListener("load", function() {
         generate()
     }
     function syncRandomLabel() {
-        label3.innerHTML = "Random Range: " + diamondSquare.randRange
+        label3.innerHTML = "Random Range: " + diamondSquare.initialRange
     }
     function randomRangeHandler(e) {
-        diamondSquare.randRange = slider3.value
+        diamondSquare.initialRange = slider3.value
         syncRandomLabel()
         generate()
     }
@@ -78,6 +78,7 @@ window.addEventListener("load", function() {
     function seedHandler(e) {
         diamondSquare.setSeed(slider4.value)
         syncSeedLabel()
+        generate()
     }
 
     // Perlin
@@ -131,7 +132,7 @@ window.addEventListener("load", function() {
 
             slider1.value = diamondSquare.iterations
             slider2.value = diamondSquare.imoothness
-            slider3.value = diamondSquare.randRange
+            slider3.value = diamondSquare.initialRange
             syncIterationLabel()
             syncSmoothnessLabel()
             syncRandomLabel()
@@ -145,7 +146,7 @@ window.addEventListener("load", function() {
         initializeSlider(slider2, .1, 1, .1, diamondSquare.smoothness, smoothnessHandler)
         syncSmoothnessLabel()
 
-        initializeSlider(slider3, 1, 40, 1, diamondSquare.randRange, randomRangeHandler)
+        initializeSlider(slider3, 1, 40, 1, diamondSquare.initialRange, randomRangeHandler)
         syncRandomLabel()
 
         initializeSlider(slider4, 1, 256, 1, diamondSquare.getSeed(), seedHandler)
@@ -197,7 +198,6 @@ window.addEventListener("load", function() {
      * h is a height value from 0-100 and determines shading
      */
     function drawPixel(x, y, h) {
-        console.debug("Drawing pixel", x, y, h, PIXEL_SIZE)
         var color = Math.floor(h * 2.55)
         ctx.fillStyle = "rgb("+color+","+color+","+color+")"
         ctx.fillRect(x * PIXEL_SIZE, y * PIXEL_SIZE, PIXEL_SIZE, PIXEL_SIZE)
@@ -207,6 +207,7 @@ window.addEventListener("load", function() {
      * Draws a Diamond-Square height map (1-dimensional pixel array)
      */
     function drawHMap(map) {
+        console.debug("Drawing height map", map)
         for (var i = 0; i < map.length; i++) {
             var x = i % diamondSquare.rowSize
             var y = Math.floor(i / diamondSquare.rowSize)

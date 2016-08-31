@@ -19,20 +19,23 @@
 
 var IntegerNoise = require('./integer-noise.js')
 
-var DiamondSquare = function(defaultIterations, defaultSmoothness, initialRange) {
+/**
+ * Defaults for iterations, smoothness, and initial range are passed into the
+ * constructor.
+ * Initial range: the range of random values is decreased on each iteration.
+ * The degree of the decrease is determined by the smoothness constant.
+ */
+var DiamondSquare = function(defaultIterations, defaultSmoothness, defaultInitialRange) {
     this.defaultIterations = defaultIterations ? defaultIterations : 1
     this.defaultSmoothness = defaultSmoothness ? defaultSmoothness : .5
-    this.initialRange = initialRange ? initialRange : 20
+    this.defaultInitialRange = defaultInitialRange ? defaultInitialRange : 20
 
     // Now that defaults are set, call reset to set the normal values
     this.reset()
 
     this.integerNoise = new IntegerNoise()
 
-    this.rowSize = Math.pow(2, this.iterations) + 1
-
     this.heightMap = 0
-
     this.sqrSide = 0
 }
 
@@ -40,9 +43,9 @@ var DiamondSquare = function(defaultIterations, defaultSmoothness, initialRange)
  * Reset to initial values.
  */
 DiamondSquare.prototype.reset = function() {
-    this.iterations = this.defaultIterations
+    this.setIterations(this.defaultIterations)
     this.smoothness = this.defaultSmoothness
-    this.randRange = this.initialRange
+    this.initialRange = this.defaultInitialRange
 }
 
 DiamondSquare.prototype.random = function(pt) {
@@ -101,8 +104,17 @@ DiamondSquare.prototype.diamondStep = function(pt) {
     this.diamondCornerAvg(pt + Math.floor(this.sqrSide / 2) * this.rowSize) // Bottom
 }
 
-DiamondSquare.prototype.generate = function() {
+/**
+ * Set number of iterations and recalculate row size.
+ */
+DiamondSquare.prototype.setIterations = function(iterations) {
+    this.iterations = iterations
     this.rowSize = Math.pow(2, this.iterations) + 1
+}
+
+DiamondSquare.prototype.generate = function() {
+    console.debug("Generating with " + this.iterations + " iterations.")
+
     this.randRange = this.initialRange
 
     this.heightMap = []
@@ -116,7 +128,7 @@ DiamondSquare.prototype.generate = function() {
     this.heightMap[(this.rowSize - 1) * this.rowSize] += this.random((this.rowSize - 1) * this.rowSize)
     this.heightMap[this.heightMap.length - 1] += this.random(this.heightMap.length - 1)
 
-    for (var iteration = 1; iteration < this.iterations; iteration++) {
+    for (var iteration = 1; iteration <= this.iterations; iteration++) {
         var squares = Math.pow(4, iteration - 1)
         this.sqrSide = Math.ceil(this.rowSize / (Math.pow(2, iteration - 1)))
         var sqrRow_s = Math.pow(2, iteration - 1)
