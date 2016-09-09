@@ -10,225 +10,290 @@
  */
 var DiamondSquare = require("../../src/diamond-square")
 var Perlin = require("../../src/perlin")
+var BozSlider = require("./boz-slider")
 
-window.addEventListener("load", function() {
-    window.diamondSquare = new DiamondSquare()
-    window.perlin = new Perlin()
-
-    // HTML5 Canvas context
-    var leCanvas = document.getElementById("leCanvas")
-    var ctx = leCanvas.getContext("2d")
-
-    /* UI Elements */
-    var headerAlg = document.getElementById("headerAlg")
-
-    var label1 = document.getElementById("label1")
-    var slider1 = document.getElementById("slider1")
-    var label2 = document.getElementById("label2")
-    var slider2 = document.getElementById("slider2")
-    var label3 = document.getElementById("label3")
-    var slider3 = document.getElementById("slider3")
-    var label4 = document.getElementById("label4")
-    var slider4 = document.getElementById("slider4")
-
-    var radioDiamondSquare = document.getElementById("d-s")
-    var radioPerlin = document.getElementById("perlin")
-
-    var btnRegen = document.getElementById("btnRegen")
-
-    // This is for diamond-square
-    function calculatePixelSize() {
-        return leCanvas.width / diamondSquare.rowSize
+/**
+ * Params is an object with two parameters:
+ *   `element` - the element in which to create the demo.
+ *   `algorithm` (optional) - the algorithm to start displaying.
+ */
+var FractalDemo2D = function(params) {
+    if (typeof params.element == "undefined") {
+        console.error("No element defined! Aborting demo.")
+        return
     }
 
-    var PERLIN_SCALE = 124
-    var PIXEL_SIZE = calculatePixelSize()
+    // Create the random noise functions
+    this.diamondSquare = new DiamondSquare()
+    this.perlin = new Perlin()
 
-    /* UI Handlers */
+    this.PERLIN_SCALE = 124
 
-    // Diamond-Square
-    function syncIterationLabel() {
-        label1.innerHTML = "Iterations: " + diamondSquare.iterations
-    }
-    function iterationHandler(e) {
-        diamondSquare.setIterations(slider1.value)
-        syncIterationLabel()
-        PIXEL_SIZE = calculatePixelSize()
-        generate()
-    }
-    function syncSmoothnessLabel() {
-        label2.innerHTML = "Smoothness Constant: " + diamondSquare.smoothness
-    }
-    function smoothnessHandler(e) {
-        diamondSquare.smoothness = slider2.value
-        syncSmoothnessLabel()
-        generate()
-    }
-    function syncRandomLabel() {
-        label3.innerHTML = "Random Range: " + diamondSquare.initialRange
-    }
-    function randomRangeHandler(e) {
-        diamondSquare.initialRange = slider3.value
-        syncRandomLabel()
-        generate()
-    }
-    function syncSeedLabel() {
-        label4.innerHTML = "Seed: " + diamondSquare.getSeed()
-    }
-    function seedHandler(e) {
-        diamondSquare.setSeed(slider4.value)
-        syncSeedLabel()
-        generate()
+    this.ALGORITHMS = {
+        perlin: "Perlin Noise",
+        diamondSquare: "Diamond-Square"
     }
 
-    // Perlin
-    function syncOctaveLabel() {
-        label1.innerHTML = "Octaves: " + perlin.octaves
-    }
-    function octaveHandler(e) {
-        perlin.octaves = slider1.value
-        syncOctaveLabel()
-        generate()
-    }
-    function syncRoughnessLabel() {
-        label2.innerHTML = "Roughness: " + perlin.roughness
-    }
-    function roughnessHandler(e) {
-        perlin.roughness = slider2.value
-        syncRoughnessLabel()
-        generate()
-    }
-    function syncLacunarityLabel() {
-        label3.innerHTML = "Lacunarity: " + perlin.lacunarity
-    }
-    function lacunarityHandler(e) {
-        perlin.lacunarity = slider3.value
-        syncLacunarityLabel()
-        generate()
-    }
-    function syncScaleLabel() {
-        label4.innerHTML = "Scale: " + PERLIN_SCALE
-    }
-    function scaleHandler(e) {
-        PERLIN_SCALE = slider4.value
-        syncScaleLabel()
-        generate()
-    }
+    // Create the header
+    this.header = document.createElement("h1")
+    this.header.innerHTML = "Initializing. . ."
+    params.element.appendChild(this.header)
 
-    function initializeSlider(slider, min, max, step, value, handler) {
-        //slider.min = min // TODO
-        slider.max = max
-        slider.value = value
-        slider.step = step
-        slider.onchange = handler // TODO onstop?
-    }
+    // Create a canvas and get a 2D context for drawing on.
+    this.canvas = document.createElement("canvas")
+    this.canvas.className = "fractal-demo"
+    params.element.appendChild(this.canvas)
+    this.context = this.canvas.getContext("2d")
 
-    function initializeDiamondSquareUI() {
-        headerAlg.innerHTML = "Diamond-Square"
+    // Create the controls
+    var controls = document.createElement("div")
+    controls.className = "fractal-demo"
 
-        btnRegen.innerHTML = "Reset"
-        btnRegen.onclick = function() {
-            diamondSquare.reset()
+    var controlsHeader = document.createElement("h2")
+    controlsHeader.innerHTML = "Controls"
+    controls.appendChild(controlsHeader)
 
-            slider1.value = diamondSquare.iterations
-            slider2.value = diamondSquare.imoothness
-            slider3.value = diamondSquare.initialRange
-            syncIterationLabel()
-            syncSmoothnessLabel()
-            syncRandomLabel()
+    this.radioPerlin = document.createElement("input")
+    this.radioPerlin.type = "radio"
+    this.radioPerlin.id = "fractal-demo-perlin-noise"
+    this.radioPerlin.name = "algorithm"
+    this.radioPerlin.onclick = this.switchToPerlin.bind(this)
+    controls.appendChild(this.radioPerlin)
 
-            generate()
-        }
+    var perlinLabel = document.createElement("label")
+    perlinLabel.for = "fractal-demo-perlin-noise"
+    perlinLabel.innerHTML = "Perlin Noise"
+    controls.appendChild(perlinLabel)
 
-        initializeSlider(slider1, 1, 9, 1, diamondSquare.iterations, iterationHandler)
-        syncIterationLabel()
+    this.radioDS = document.createElement("input")
+    this.radioDS.type = "radio"
+    this.radioDS.id = "fractal-demo-diamond-square"
+    this.radioDS.name = "algorithm"
+    this.radioDS.onclick = this.switchToDS.bind(this)
+    controls.appendChild(this.radioDS)
 
-        initializeSlider(slider2, .1, 1, .1, diamondSquare.smoothness, smoothnessHandler)
-        syncSmoothnessLabel()
+    var dsLabel = document.createElement("label")
+    dsLabel.for = "fractal-demo-diamond-square"
+    dsLabel.innerHTML = "Diamond-Square"
+    controls.appendChild(dsLabel)
 
-        initializeSlider(slider3, 1, 40, 1, diamondSquare.initialRange, randomRangeHandler)
-        syncRandomLabel()
-
-        initializeSlider(slider4, 1, 256, 1, diamondSquare.getSeed(), seedHandler)
-        syncSeedLabel()
+    // Create the Perlin controls
+    this.perlinControls = document.createElement("div")
+    if (params.algorithm = "Diamond-Square") {
+        this.perlinControls.hidden = true
     }
 
-    function initializePerlinUI() {
-        headerAlg.innerHTML = "Perlin Noise"
+    // Octave slider
+    function octaveHandler(value) {
+        this.perlin.octaves = value
+        this.generate()
+    }
+    new BozSlider({
+        parentElement: this.perlinControls,
+        min: 1,
+        max: 9,
+        step: 1,
+        value: this.perlin.octaves,
+        labelText: "Octaves",
+        onchange: octaveHandler.bind(this)
+    })
 
-        btnRegen.innerHTML = "Regenerate Permutation Table"
-        btnRegen.onclick = function() {
-            perlin.generatePermutationTable()
-            generate()
-        }
+    // Roughness slider
+    function roughnessHandler(value) {
+        this.perlin.roughness = value
+        this.generate()
+    }
+    new BozSlider({
+        parentElement: this.perlinControls,
+        min: .01,
+        max: 4,
+        step: .01,
+        value: this.perlin.roughness,
+        label: "Roughness",
+        onchange: roughnessHandler.bind(this)
+    })
 
-        initializeSlider(slider1, 1, 9, 1, perlin.octaves, octaveHandler)
-        syncOctaveLabel()
+    // Lacunarity slider
+    function lacunarityHandler(value) {
+        this.perlin.lacunarity = value
+        this.generate()
+    }
+    new BozSlider({
+        parentElement: this.perlinControls,
+        min: 1,
+        max: 16,
+        step: 1,
+        value: this.perlin.lacunarity,
+        label: "Lacunarity",
+        onchange: lacunarityHandler.bind(this)
+    })
 
-        initializeSlider(slider2, .01, 4, .01, perlin.roughness, roughnessHandler)
-        syncRoughnessLabel()
+    function scaleHandler(value) {
+        this.PERLIN_SCALE = value
+        this.generate()
+    }
+    new BozSlider({
+        parentElement: this.perlinControls,
+        min: 1,
+        max: 256,
+        step: 1,
+        value: this.PERLIN_SCALE,
+        label: "Scale",
+        onchange: scaleHandler.bind(this)
+    })
 
-        initializeSlider(slider3, 1, 16, 1, perlin.lacunarity, lacunarityHandler)
-        syncLacunarityLabel()
+    // regenerate permutation table button
+    var btnRegen = document.createElement("button")
+    btnRegen.innerHTML = "Regenerate Permutation Table"
+    btnRegen.onclick = function() {
+        this.perlin.generatePermutationTable()
+        this.generate()
+    }
+    this.perlinControls.appendChild(btnRegen)
 
-        initializeSlider(slider4, 1, 256, 1, PERLIN_SCALE, scaleHandler)
-        syncScaleLabel()
+    // Finally, append the Perlin controls.
+    controls.appendChild(this.perlinControls)
+
+    // Create the Diamond-Square controls
+    this.diamondSquareControls = document.createElement("div")
+    if (params.algorithm != "Diamond-Square") {
+        this.diamondSquareControls.hidden = true
     }
 
-    function initialize() {
-        //console.log("Initializing")
-
-        radioDiamondSquare.onclick = function() {
-            PIXEL_SIZE = calculatePixelSize()
-            initializeDiamondSquareUI()
-            generate()
-        }
-        radioPerlin.onclick = function() {
-            PIXEL_SIZE = 1
-            initializePerlinUI()
-            generate()
-        }
-
-        // Start with the Diamond-Square demo
-        radioDiamondSquare.click()
+    // Iterations
+    function iterationHandler(value) {
+        this.diamondSquare.setIterations(value)
+        this.calculatePixelSize()
+        this.generate()
     }
+    new BozSlider({
+        parentElement: this.diamondSquareControls,
+        min: 1,
+        max: 9,
+        step: 1,
+        value: this.diamondSquare.iterations,
+        label: "Iterations",
+        onchange: iterationHandler.bind(this)
+    })
 
-    /**
-     * Draws a pixel of PIXEL_SIZE at coordinates (x, y)
-     * h is a height value from 0-100 and determines shading
-     */
-    function drawPixel(x, y, h) {
-        var color = Math.floor(h * 2.55)
-        ctx.fillStyle = "rgb("+color+","+color+","+color+")"
-        ctx.fillRect(x * PIXEL_SIZE, y * PIXEL_SIZE, PIXEL_SIZE, PIXEL_SIZE)
+    // Smoothness
+    function smoothnessHandler(value) {
+        this.diamondSquare.smoothness = value
+        this.generate()
     }
+    new BozSlider({
+        parentElement: this.diamondSquareControls,
+        min: .1,
+        max: 1,
+        step: .1,
+        value: this.diamondSquare.smoothness,
+        label: "Smoothness",
+        onchange: smoothnessHandler.bind(this)
+    })
 
-    /**
-     * Draws a Diamond-Square height map (1-dimensional pixel array)
-     */
-    function drawHMap(map) {
-        //console.debug("Drawing height map", map)
-        for (var i = 0; i < map.length; i++) {
-            var x = i % diamondSquare.rowSize
-            var y = Math.floor(i / diamondSquare.rowSize)
-            drawPixel(x, y, Math.floor(map[i]))
-        }
+    // Random Range
+    function randomRangeHandler(value) {
+        this.diamondSquare.initialRange = value
+        this.generate()
     }
+    new BozSlider({
+        parentElement: this.diamondSquareControls,
+        min: 1,
+        max: 40,
+        step: 1,
+        value: this.diamondSquare.initialRange,
+        label: "Random Range",
+        onchange: randomRangeHandler
+    })
 
-    function generate() {
-        ctx.clearRect(0, 0, leCanvas.width, leCanvas.height)
-        if (radioDiamondSquare.checked) {
-            drawHMap(diamondSquare.generate())
-        } else {
-            ctx.clearRect(0, 0, leCanvas.width, leCanvas.height)
-            for (var y = 0; y < Math.floor(leCanvas.height); y++) {
-                for (var x = 0; x < Math.floor(leCanvas.width); x++) {
-                    var p = perlin.fBm2(x / PERLIN_SCALE, y / PERLIN_SCALE, 1)
-                    drawPixel(x, y, (p + 1) * 40)
-                }
+    // Seed
+    function seedHandler(value) {
+        this.diamondSquare.setSeed(value)
+        this.generate()
+    }
+    new BozSlider({
+        parentElement: this.seedHandler,
+        min: 1,
+        max: 256,
+        step: 1,
+        value: this.diamondSquare.getSeed(),
+        label: "Seed",
+        onchange: seedHandler
+    })
+
+    // Append the D-S controls.
+    controls.appendChild(this.diamondSquareControls)
+
+    // Append the entirety of the controls.
+    params.element.appendChild(controls)
+}
+
+FractalDemo2D.prototype.switchToPerlin = function() {
+    this.header.innerHTML = this.ALGORITHMS.perlin
+    this.calculatePixelSize()
+    this.perlinControls.hidden = false
+    this.diamondSquareControls.hidden = true
+    this.generate()
+}
+
+FractalDemo2D.prototype.switchToDS = function() {
+    this.header.innerHTML = this.ALGORITHMS.diamondSquare
+    this.calculatePixelSize()
+    this.perlinControls.hidden = true
+    this.diamondSquareControls.hidden = false
+    this.generate()
+}
+
+/**
+ * Recalculate pixel size (this is mainly for Diamond-Square)
+ */
+FractalDemo2D.prototype.calculatePixelSize = function() {
+    if (this.currentAlgorithm = this.ALGORITHMS.diamondSquare) {
+        this.pixelSize = this.canvas.width / diamondSquare.rowSize
+    } else {
+        this.pixelSize = 1
+    }
+}
+
+/**
+ * Draws a pixel of this.pixelSize at coordinates (x, y)
+ * h is a height value from 0-100 and determines shading
+ */
+FractalDemo2D.prototype.drawPixel = function(x, y, h) {
+    var color = Math.floor(h * 2.55)
+    this.context.fillStyle = "rgb("+color+","+color+","+color+")"
+    this.context.fillRect(x * this.pixelSize, y * this.pixelSize, this.pixelSize, this.pixelSize)
+}
+
+/**
+ * Draws a Diamond-Square height map (1-dimensional pixel array)
+ */
+FractalDemo2D.prototype.drawHMap = function(map) {
+    //console.debug("Drawing height map", map)
+    for (var i = 0; i < map.length; i++) {
+        var x = i % this.diamondSquare.rowSize
+        var y = Math.floor(i / this.diamondSquare.rowSize)
+        this.drawPixel(x, y, Math.floor(map[i]))
+    }
+}
+
+FractalDemo2D.prototype.generate = function() {
+    this.context.clearRect(0, 0, this.canvas.width, this.canvas.height)
+    if (this.currentAlgorithm = this.ALGORITHMS.diamondSquare) {
+        this.drawHMap(this.diamondSquare.generate())
+    } else {
+        this.context.clearRect(0, 0, this.canvas.width, this.canvas.height)
+        for (var y = 0; y < Math.floor(this.canvas.height); y++) {
+            for (var x = 0; x < Math.floor(this.canvas.width); x++) {
+                var p = this.perlin.fBm2(x / this.PERLIN_SCALE, y / this.PERLIN_SCALE, 1)
+                this.drawPixel(x, y, (p + 1) * 40)
             }
         }
     }
+}
 
-    initialize()
+window.addEventListener("load", function() {
+    window.fractalDemo2D = new FractalDemo2D({
+        element: document.getElementById("demo-container")
+    })
 })
