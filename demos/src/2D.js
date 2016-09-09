@@ -42,6 +42,8 @@ var FractalDemo2D = function(params) {
     // Create a canvas and get a 2D context for drawing on.
     this.canvas = document.createElement("canvas")
     this.canvas.className = "fractal-demo"
+    this.canvas.width = 512
+    this.canvas.height = 512
     params.element.appendChild(this.canvas)
     this.context = this.canvas.getContext("2d")
 
@@ -61,9 +63,10 @@ var FractalDemo2D = function(params) {
     controls.appendChild(this.radioPerlin)
 
     var perlinLabel = document.createElement("label")
-    perlinLabel.for = "fractal-demo-perlin-noise"
+    perlinLabel.setAttribute("for", "fractal-demo-perlin-noise")
     perlinLabel.innerHTML = "Perlin Noise"
     controls.appendChild(perlinLabel)
+    controls.appendChild(document.createElement("br"))
 
     this.radioDS = document.createElement("input")
     this.radioDS.type = "radio"
@@ -73,15 +76,13 @@ var FractalDemo2D = function(params) {
     controls.appendChild(this.radioDS)
 
     var dsLabel = document.createElement("label")
-    dsLabel.for = "fractal-demo-diamond-square"
+    dsLabel.setAttribute("for", "fractal-demo-diamond-square")
     dsLabel.innerHTML = "Diamond-Square"
     controls.appendChild(dsLabel)
 
     // Create the Perlin controls
     this.perlinControls = document.createElement("div")
-    if (params.algorithm = "Diamond-Square") {
-        this.perlinControls.hidden = true
-    }
+    this.perlinControls.className = "perlin-controls"
 
     // Octave slider
     function octaveHandler(value) {
@@ -94,9 +95,10 @@ var FractalDemo2D = function(params) {
         max: 9,
         step: 1,
         value: this.perlin.octaves,
-        labelText: "Octaves",
+        label: "Octaves",
         onchange: octaveHandler.bind(this)
     })
+    this.perlinControls.appendChild(document.createElement("br"))
 
     // Roughness slider
     function roughnessHandler(value) {
@@ -112,6 +114,7 @@ var FractalDemo2D = function(params) {
         label: "Roughness",
         onchange: roughnessHandler.bind(this)
     })
+    this.perlinControls.appendChild(document.createElement("br"))
 
     // Lacunarity slider
     function lacunarityHandler(value) {
@@ -127,6 +130,7 @@ var FractalDemo2D = function(params) {
         label: "Lacunarity",
         onchange: lacunarityHandler.bind(this)
     })
+    this.perlinControls.appendChild(document.createElement("br"))
 
     function scaleHandler(value) {
         this.PERLIN_SCALE = value
@@ -141,14 +145,15 @@ var FractalDemo2D = function(params) {
         label: "Scale",
         onchange: scaleHandler.bind(this)
     })
+    this.perlinControls.appendChild(document.createElement("br"))
 
     // regenerate permutation table button
     var btnRegen = document.createElement("button")
     btnRegen.innerHTML = "Regenerate Permutation Table"
-    btnRegen.onclick = function() {
+    btnRegen.onclick = (function() {
         this.perlin.generatePermutationTable()
         this.generate()
-    }
+    }).bind(this)
     this.perlinControls.appendChild(btnRegen)
 
     // Finally, append the Perlin controls.
@@ -156,9 +161,7 @@ var FractalDemo2D = function(params) {
 
     // Create the Diamond-Square controls
     this.diamondSquareControls = document.createElement("div")
-    if (params.algorithm != "Diamond-Square") {
-        this.diamondSquareControls.hidden = true
-    }
+    this.diamondSquareControls.className = "diamond-square-controls"
 
     // Iterations
     function iterationHandler(value) {
@@ -175,6 +178,7 @@ var FractalDemo2D = function(params) {
         label: "Iterations",
         onchange: iterationHandler.bind(this)
     })
+    this.diamondSquareControls.appendChild(document.createElement("br"))
 
     // Smoothness
     function smoothnessHandler(value) {
@@ -190,6 +194,7 @@ var FractalDemo2D = function(params) {
         label: "Smoothness",
         onchange: smoothnessHandler.bind(this)
     })
+    this.diamondSquareControls.appendChild(document.createElement("br"))
 
     // Random Range
     function randomRangeHandler(value) {
@@ -205,6 +210,7 @@ var FractalDemo2D = function(params) {
         label: "Random Range",
         onchange: randomRangeHandler
     })
+    this.diamondSquareControls.appendChild(document.createElement("br"))
 
     // Seed
     function seedHandler(value) {
@@ -212,7 +218,7 @@ var FractalDemo2D = function(params) {
         this.generate()
     }
     new BozSlider({
-        parentElement: this.seedHandler,
+        parentElement: this.diamondSquareControls,
         min: 1,
         max: 256,
         step: 1,
@@ -220,27 +226,36 @@ var FractalDemo2D = function(params) {
         label: "Seed",
         onchange: seedHandler
     })
+    this.diamondSquareControls.appendChild(document.createElement("br"))
 
     // Append the D-S controls.
     controls.appendChild(this.diamondSquareControls)
 
     // Append the entirety of the controls.
     params.element.appendChild(controls)
+
+    if (params.algorithm && params.algorithm == this.ALGORITHMS.diamondSquare) {
+        this.radioDS.click()
+    } else {
+        this.radioPerlin.click()
+    }
 }
 
 FractalDemo2D.prototype.switchToPerlin = function() {
-    this.header.innerHTML = this.ALGORITHMS.perlin
-    this.calculatePixelSize()
-    this.perlinControls.hidden = false
-    this.diamondSquareControls.hidden = true
-    this.generate()
+    this.switchTo(this.ALGORITHMS.perlin)
 }
 
 FractalDemo2D.prototype.switchToDS = function() {
-    this.header.innerHTML = this.ALGORITHMS.diamondSquare
+    this.switchTo(this.ALGORITHMS.diamondSquare)
+}
+
+FractalDemo2D.prototype.switchTo = function(algorithm) {
+    console.log("Switching to " + algorithm)
+    this.currentAlgorithm = algorithm
+    this.header.innerHTML = algorithm
     this.calculatePixelSize()
-    this.perlinControls.hidden = true
-    this.diamondSquareControls.hidden = false
+    this.perlinControls.hidden = algorithm == this.ALGORITHMS.diamondSquare ? true : false
+    this.diamondSquareControls.hidden = algorithm == this.ALGORITHMS.perlin ? true : false
     this.generate()
 }
 
@@ -248,8 +263,8 @@ FractalDemo2D.prototype.switchToDS = function() {
  * Recalculate pixel size (this is mainly for Diamond-Square)
  */
 FractalDemo2D.prototype.calculatePixelSize = function() {
-    if (this.currentAlgorithm = this.ALGORITHMS.diamondSquare) {
-        this.pixelSize = this.canvas.width / diamondSquare.rowSize
+    if (this.currentAlgorithm == this.ALGORITHMS.diamondSquare) {
+        this.pixelSize = this.canvas.width / this.diamondSquare.rowSize
     } else {
         this.pixelSize = 1
     }
@@ -279,7 +294,7 @@ FractalDemo2D.prototype.drawHMap = function(map) {
 
 FractalDemo2D.prototype.generate = function() {
     this.context.clearRect(0, 0, this.canvas.width, this.canvas.height)
-    if (this.currentAlgorithm = this.ALGORITHMS.diamondSquare) {
+    if (this.currentAlgorithm == this.ALGORITHMS.diamondSquare) {
         this.drawHMap(this.diamondSquare.generate())
     } else {
         this.context.clearRect(0, 0, this.canvas.width, this.canvas.height)
